@@ -49,12 +49,16 @@ def invoke_tracked(llm, prompt: str, tokens: dict) -> str:
     return response.content
 
 
+def compute_cost(tokens: dict) -> float:
+    """Single source of truth for token → dollar cost. Both apps and the badges use this."""
+    return (tokens["input"] / 1e6 * INPUT_PRICE_PER_M +
+            tokens["output"] / 1e6 * OUTPUT_PRICE_PER_M)
+
+
 def cost_caption(tokens: dict) -> str:
     total = tokens["input"] + tokens["output"]
-    cost  = (tokens["input"] / 1e6 * INPUT_PRICE_PER_M +
-             tokens["output"] / 1e6 * OUTPUT_PRICE_PER_M)
     return (f"💰 **{total:,} tokens** ({tokens['input']:,} in · {tokens['output']:,} out) · "
-            f"**~${cost:.6f}** · {MODEL_LABEL}")
+            f"**~${compute_cost(tokens):.6f}** · {MODEL_LABEL}")
 
 
 # ── Router ────────────────────────────────────────────────────────────────────
@@ -82,21 +86,21 @@ def resolve_entities(question: str, engine, entity_tables: list) -> str:
     """Look up capitalised words in the DB to find exact name matches."""
     candidates = re.findall(r'\b[A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*\b', question)
     hints, seen = [], set()
-    for candidate in candidates:
-        if candidate in seen or len(candidate) < 3:
-            continue
-        seen.add(candidate)
-        for table, column in entity_tables:
-            try:
-                with engine.connect() as conn:
+    with engine.connect() as conn:
+        for candidate in candidates:
+            if candidate in seen or len(candidate) < 3:
+                continue
+            seen.add(candidate)
+            for table, column in entity_tables:
+                try:
                     rows = conn.execute(
                         text(f'SELECT DISTINCT {column} FROM "{table}" WHERE {column} LIKE :p LIMIT 3'),
                         {"p": f"%{candidate}%"}
                     ).fetchall()
-                if rows:
-                    hints.append(f"'{candidate}' found in DB as: {[r[0] for r in rows]}")
-            except Exception:
-                pass
+                    if rows:
+                        hints.append(f"'{candidate}' found in DB as: {[r[0] for r in rows]}")
+                except Exception:
+                    pass
     return "\n".join(hints)
 
 
@@ -242,8 +246,7 @@ def render_result(state, sql, df, answer, chart_spec, tokens, out_of_scope_msg: 
     # ── SUCCESS ──
 
     # Route / latency / cost badge
-    total_cost = (tokens["input"] / 1e6 * INPUT_PRICE_PER_M +
-                  tokens["output"] / 1e6 * OUTPUT_PRICE_PER_M)
+    total_cost = compute_cost(tokens)
     total_tokens = tokens["input"] + tokens["output"]
     b1, b2, b3, b4 = st.columns(4)
     b1.metric("Route", ROUTE_LABELS.get(route, "—") if route else "—")

@@ -9,7 +9,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 from utils import (
     fresh_tokens, route_question, resolve_entities,
     single_shot, react, get_chart_spec, render_result,
-    render_sidebar_history, cost_caption,
+    render_sidebar_history, cost_caption, compute_cost,
     ROUTE_LABELS, SUCCESS, OUT_OF_SCOPE,
 )
 from langchain_community.utilities import SQLDatabase
@@ -317,7 +317,7 @@ if question:
                   route=route, elapsed=elapsed)
 
     if state == SUCCESS and answer:
-        total_cost = (tokens["input"] / 1e6 * 0.14 + tokens["output"] / 1e6 * 0.28)
+        total_cost = compute_cost(tokens)
         st.session_state.history.insert(0, {
             "question": question,
             "route_label": ROUTE_LABELS[route],
