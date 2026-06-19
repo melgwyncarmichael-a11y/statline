@@ -1,0 +1,10 @@
+.env
+*.sqlite
+__pycache__/
+*.pyc
+.venv/
+.DS_Store
+
+# Raw downloaded datasets (regenerable from Kaggle; loaded into gitignored .sqlite)
+Nba Agent 2/NBA Data/csv/
+*.csv
