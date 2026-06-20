@@ -10,8 +10,13 @@ from utils import (
     fresh_tokens, route_question, resolve_entities,
     single_shot, react, get_chart_spec, render_result,
     render_sidebar_history, cost_caption, compute_cost,
+    inject_theme, render_hero,
     ROUTE_LABELS, SUCCESS, OUT_OF_SCOPE,
 )
+
+# ── Brand accent (pitch green) ────────────────────────────────────────────────
+ACCENT      = "#1B9E55"
+ACCENT_SOFT = "#E8F6EE"
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain_openai import ChatOpenAI
@@ -215,8 +220,9 @@ render_sidebar_history(st.session_state.history)
 
 # ── UI ────────────────────────────────────────────────────────────────────────
 
-st.title("⚽ Statline · Football")
-st.caption("Ask anything about European football — in plain English.")
+inject_theme(ACCENT, ACCENT_SOFT)
+render_hero("⚽", "Football", "Ask anything about European football — in plain English.",
+            ACCENT, ACCENT_SOFT)
 
 st.markdown("""
 **Dataset:** European Soccer Database (Kaggle) — 11 European leagues including the Premier League,

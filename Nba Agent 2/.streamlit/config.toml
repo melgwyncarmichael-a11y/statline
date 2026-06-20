@@ -1,0 +1,10 @@
+[theme]
+primaryColor = "#EA580C"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F7F9"
+textColor = "#101828"
+font = "sans serif"
+
+[server]
+# Disable the module-rescan watcher (avoids the transformers/torchvision import crash).
+fileWatcherType = "none"

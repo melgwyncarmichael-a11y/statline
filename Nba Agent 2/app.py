@@ -10,8 +10,13 @@ from utils import (
     fresh_tokens, route_question, resolve_entities,
     single_shot, react, get_chart_spec, render_result,
     render_sidebar_history, cost_caption, compute_cost,
+    inject_theme, render_hero,
     ROUTE_LABELS, SUCCESS, OUT_OF_SCOPE,
 )
+
+# ── Brand accent (court orange) ───────────────────────────────────────────────
+ACCENT      = "#EA580C"
+ACCENT_SOFT = "#FDEDE3"
 from langchain_community.utilities import SQLDatabase
 from langchain_community.agent_toolkits import create_sql_agent
 from langchain_openai import ChatOpenAI
@@ -201,8 +206,9 @@ render_sidebar_history(st.session_state.history)
 
 # ── UI ────────────────────────────────────────────────────────────────────────
 
-st.title("🏀 Statline · Hoops")
-st.caption("Ask anything about the NBA — in plain English.")
+inject_theme(ACCENT, ACCENT_SOFT)
+render_hero("🏀", "Hoops", "Ask anything about the NBA — in plain English.",
+            ACCENT, ACCENT_SOFT)
 
 st.markdown("""
 **Dataset:** NBA Database (Kaggle) — comprehensive NBA data spanning 1946 to 2023.

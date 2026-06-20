@@ -32,6 +32,81 @@ ROUTE_LABELS = {
 }
 
 
+# ── Branding / theme ──────────────────────────────────────────────────────────
+
+def inject_theme(accent: str, accent_soft: str):
+    """Inject the shared Statline look & feel. accent = sport colour, accent_soft = tint."""
+    st.markdown(f"""
+    <style>
+      /* Tighter, bolder headings */
+      h1, h2, h3 {{ letter-spacing: -0.02em; }}
+      h3 {{ font-weight: 700; }}
+
+      /* Metric cards (overview row + result badge) */
+      [data-testid="stMetric"] {{
+          background: #FFFFFF;
+          border: 1px solid #ECEFF3;
+          border-left: 4px solid {accent};
+          border-radius: 12px;
+          padding: 14px 16px 10px 16px;
+          box-shadow: 0 1px 3px rgba(16,24,40,0.06);
+      }}
+      [data-testid="stMetricValue"] {{ font-weight: 700; color: #101828; }}
+      [data-testid="stMetricLabel"] p {{ color: #667085; font-weight: 600; }}
+
+      /* Buttons (question chips, dice) */
+      .stButton > button {{
+          border-radius: 10px;
+          border: 1px solid #E3E8EF;
+          font-weight: 500;
+          transition: all .15s ease;
+      }}
+      .stButton > button:hover {{
+          border-color: {accent};
+          color: {accent};
+          background: {accent_soft};
+      }}
+
+      /* Expanders */
+      [data-testid="stExpander"] details {{
+          border: 1px solid #ECEFF3;
+          border-radius: 12px;
+      }}
+
+      /* Sidebar tint */
+      [data-testid="stSidebar"] {{ background: #FAFBFC; border-right: 1px solid #EEF1F4; }}
+
+      /* Text input focus glow in accent */
+      [data-testid="stTextInput"] input:focus {{
+          border-color: {accent};
+          box-shadow: 0 0 0 2px {accent_soft};
+      }}
+    </style>
+    """, unsafe_allow_html=True)
+
+
+def render_hero(icon: str, edition: str, tagline: str, accent: str, accent_soft: str):
+    """Branded Statline header band — replaces a plain st.title."""
+    st.markdown(f"""
+    <div style="
+        background: linear-gradient(135deg, {accent_soft} 0%, #FFFFFF 70%);
+        border: 1px solid #ECEFF3;
+        border-radius: 16px;
+        padding: 20px 26px;
+        margin: 4px 0 18px 0;">
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span style="font-size:36px; line-height:1;">{icon}</span>
+        <div>
+          <div style="font-size:30px; font-weight:800; letter-spacing:-0.02em; color:#101828; line-height:1.05;">
+            Statline <span style="color:{accent};">·</span> <span style="color:{accent};">{edition}</span>
+          </div>
+          <div style="color:#667085; font-size:15px; margin-top:6px;">{tagline}</div>
+        </div>
+      </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+
 # ── Token tracking ────────────────────────────────────────────────────────────
 
 def fresh_tokens():
