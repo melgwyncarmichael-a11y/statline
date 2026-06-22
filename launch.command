@@ -57,8 +57,10 @@ echo "  Both apps are running!"
 echo "  Football → http://localhost:8501"
 echo "  NBA      → http://localhost:8502"
 echo ""
-echo "  Press Ctrl+C to stop both."
+echo "  This terminal is now free — you can"
+echo "  launch other apps normally."
+echo "  To stop Statline: kill $FOOTBALL_PID $NBA_PID"
 echo "========================================"
 
-# Wait — keeps terminal open so Ctrl+C stops both cleanly
-wait $FOOTBALL_PID $NBA_PID
+# Do NOT wait — let the launcher exit so this terminal stays free for other portfolio apps.
+# The Streamlit processes are already backgrounded and will keep running independently.

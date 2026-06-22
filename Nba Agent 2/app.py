@@ -45,8 +45,29 @@ Key tables and what they contain:
 - team: full team details. Join: game.team_id_home = team.id or game.team_id_away = team.id.
 - line_score: quarter-by-quarter scores per game. Join: line_score.game_id = game.game_id.
 
-To get total points scored by a team across games, SUM both pts_home (when home) and pts_away (when away) using UNION ALL.
+Draft and college info (in common_player_info):
+- school: the college/university the player attended (e.g. 'Duke', 'Kentucky', 'None' if pro/international).
+- country: the player's nationality (e.g. 'USA', 'France'). NOT the school's country.
+- To count players who went to school outside the US, filter school IS NOT NULL AND school != '' AND school != 'None'
+  AND country != 'USA'. Do NOT use country != 'USA' alone — that filters by nationality, not school location.
+
+IMPORTANT — to get total points scored by a team across games, you MUST use UNION ALL to combine
+home and away contributions. NEVER sum only pts_home or only pts_away — that undercounts by ~50%.
+Correct pattern:
+  SELECT team_name, SUM(pts) AS total_points FROM (
+      SELECT team_name_home AS team_name, pts_home AS pts FROM game
+      WHERE season_id LIKE '2%' AND pts_home IS NOT NULL
+      UNION ALL
+      SELECT team_name_away AS team_name, pts_away AS pts FROM game
+      WHERE season_id LIKE '2%' AND pts_away IS NOT NULL
+  ) GROUP BY team_name ORDER BY total_points DESC;
+This applies to any "total points by team" question, with or without a season filter.
 To filter by season year: season_id LIKE '2YYYY%' (e.g. '22021%' for 2021-22).
+
+IMPORTANT — there is NO per-player scoring column in this database. The game table only has
+team-level totals (pts_home, pts_away). There is NO box score table with individual player points.
+If asked for top scorers by total points, return:
+  SELECT 'Individual player scoring totals are not available in this dataset — only team-level points exist.' AS answer;
 
 Salary enrichment (Transfermarkt-style, 2000-2025, ~97% of players matched):
 - player_salary(player_name, player_name_normalised, salary, season_start_year): one row per player per season.
@@ -75,7 +96,7 @@ ENTITY_TABLES = [
 
 QUESTION_CATEGORIES = {
     "🏆 Rankings": [
-        "Who are the top 10 scorers by total points all time?",
+        "Which team scored the most total points in NBA history?",
         "Which team has the most wins in NBA history?",
     ],
     "📊 Season Stats": [
@@ -84,7 +105,7 @@ QUESTION_CATEGORIES = {
     ],
     "👤 Player Stats": [
         "What is the average height of NBA players by position?",
-        "How many players in the dataset were drafted from international schools?",
+        "How many players in the dataset attended a college outside the US?",
     ],
     "📈 Trends": [
         "What is the average points per game by season?",
@@ -102,8 +123,8 @@ OUT_OF_SCOPE_MSG = (
     "This app only knows about NBA data: games, teams, players and stats "
     "from **1946 to 2023**.\n\n"
     "Try asking:\n"
+    "- *Which team scored the most total points in NBA history?*\n"
     "- *Which team scored the most points in the 2021-22 season?*\n"
-    "- *Who are the top 10 scorers of all time?*\n"
     "- *Which team had the best win rate in the 2019-20 season?*"
 )
 
